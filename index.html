@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#087443">
+<title>গ্রামীণ ব্যাংক কোড সার্চ</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans Bengali",sans-serif;color:#15231c;background:#f3f7f4}
+*{box-sizing:border-box}body{margin:0}.top{background:#087443;color:#fff;padding:24px 18px 22px;border-radius:0 0 22px 22px}
+h1{font-size:23px;margin:0 0 7px}.sub{font-size:13px;opacity:.9}
+main{padding:16px;max-width:760px;margin:auto}.searchbox{display:flex;gap:8px;background:#fff;padding:10px;border-radius:15px;box-shadow:0 3px 14px #173b2612}
+input{width:100%;border:0;outline:0;font-size:16px;padding:8px;background:transparent;color:#14251b}
+button{border:0;border-radius:10px;background:#087443;color:#fff;padding:10px 14px;font-size:14px;font-weight:600}
+.stats{display:flex;justify-content:space-between;align-items:center;margin:15px 2px 10px;color:#4a6154;font-size:13px}
+#results{display:grid;gap:9px}.item{background:#fff;border-radius:13px;padding:14px 15px;box-shadow:0 2px 8px #173b260a;display:flex;gap:12px;align-items:flex-start}
+.code{background:#e5f4eb;color:#07663b;border-radius:9px;padding:7px 9px;font-weight:750;font-size:14px;min-width:70px;text-align:center;overflow-wrap:anywhere}
+.desc{font-size:15px;line-height:1.55;padding-top:4px;overflow-wrap:anywhere;flex:1}
+.empty{background:#fff;border-radius:13px;padding:24px;text-align:center;color:#66766d}
+.foot{text-align:center;color:#809087;font-size:11px;padding:22px 0}
+</style>
+</head>
+<body>
+<header class="top"><h1>গ্রামীণ ব্যাংক কোড সার্চ</h1><div class="sub">কোড নম্বর অথবা বিবরণ লিখে খুঁজুন</div></header>
+<main>
+<div class="searchbox"><input id="q" type="search" placeholder="যেমন: 1309, শিক্ষা, cash..." autocomplete="off" aria-label="সার্চ"><button id="clear">মুছুন</button></div>
+<div class="stats"><span id="count">সব কোড দেখানো হচ্ছে</span><span id="total"></span></div>
+<div id="results"></div>
+<div class="foot">অফলাইন সার্চ • গ্রামীণ ব্যাংক কোড তালিকা</div>
+</main>
+<script>
+let all=[];
+const norm=s=>String(s??"").toLocaleLowerCase("bn").replace(/[০-৯]/g,d=>"০১২৩৪৫৬৭৮৯".indexOf(d)).normalize("NFKC").trim();
+function render(){
+ const q=norm(document.getElementById('q').value);
+ const matches=q?all.filter(x=>norm(x.code).includes(q)||norm(x.description).includes(q)):all;
+ document.getElementById('count').textContent=q?`সার্চ ফলাফল: ${matches.length}টি`:`মোট ${all.length}টি কোড`;
+ document.getElementById('total').textContent=q?'':'সব কোড';
+ const root=document.getElementById('results');root.replaceChildren();
+ if(!matches.length){root.innerHTML='<div class="empty">কোনো ফলাফল পাওয়া যায়নি।<br>অন্য শব্দ বা কোড দিয়ে চেষ্টা করুন।</div>';return}
+ const frag=document.createDocumentFragment();
+ matches.forEach(x=>{const el=document.createElement('div');el.className='item';const c=document.createElement('div');c.className='code';c.textContent=x.code;const d=document.createElement('div');d.className='desc';d.textContent=x.description;el.append(c,d);frag.append(el)});
+ root.append(frag);
+}
+fetch('codes.json').then(r=>r.json()).then(data=>{all=data;render()}).catch(()=>{document.getElementById('results').textContent='কোড তালিকা লোড করা যায়নি।'});
+document.getElementById('q').addEventListener('input',render);
+document.getElementById('clear').addEventListener('click',()=>{document.getElementById('q').value='';render();document.getElementById('q').focus()});
+</script>
+</body></html>
